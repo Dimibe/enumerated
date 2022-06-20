@@ -58,7 +58,7 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
 
   @override
   bool contains(Object? value) {
-    if (value is Enum) {
+    if (value is T) {
       return bitValue & (1 << value.index) != 0;
     }
     return false;
@@ -71,7 +71,7 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
 
   @override
   bool containsAll(Iterable<Object?> other) {
-    if (other is Iterable<Enum>) {
+    if (other is Iterable<T>) {
       return other.every(contains);
     }
     return false;
@@ -111,18 +111,17 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
   }
 
   @override
-  // TODO: implement iterator
-  Iterator<T> get iterator => throw UnimplementedError();
+  Iterator<T> get iterator => EnumIterator._(enumConstants.toList(), bitValue);
 
   @override
   T? lookup(Object? object) {
-    // TODO: implement lookup
-    throw UnimplementedError();
+    if (contains(object)) return object as T;
+    return null;
   }
 
   @override
   bool remove(Object? value) {
-    if (contains(value) && value is Enum) {
+    if (contains(value) && value is T) {
       bitValue = bitValue ^ value.index;
       return true;
     }
@@ -131,7 +130,7 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
 
   @override
   void removeAll(Iterable<Object?> elements) {
-    // TODO: implement removeAll
+    elements.forEach(remove);
   }
 
   @override
@@ -157,20 +156,16 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
 
   @override
   T elementAt(int index) {
-    // TODO: implement elementAt
-    throw UnimplementedError();
+    return enumConstants.elementAt(bitValue << index);
   }
 
   @override
-  // TODO: implement first
-  T get first => throw UnimplementedError();
+  T get first => enumConstants.elementAt(bitValue & -bitValue);
 
   @override
-  // TODO: implement isEmpty
   bool get isEmpty => bitValue == 0;
 
   @override
-  // TODO: implement isNotEmpty
   bool get isNotEmpty => bitValue != 0;
 
   @override
@@ -184,14 +179,19 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
 }
 
 class EnumIterator<T extends Enum> extends Iterator<T> {
-  EnumIterator._(EnumSet set);
+  List<T> _elements;
+  int _remaining;
+  int _current = 0;
+
+  EnumIterator._(this._elements, this._remaining);
+
   @override
-  // TODO: implement current
-  T get current => throw UnimplementedError();
+  T get current => _elements[_current];
 
   @override
   bool moveNext() {
-    // TODO: implement moveNext
-    throw UnimplementedError();
+    _current = _remaining & -_remaining;
+    _remaining ^= _current;
+    return _remaining != 0;
   }
 }
