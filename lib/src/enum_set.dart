@@ -1,31 +1,33 @@
 import 'package:meta/meta.dart';
 
+import 'bit_operations.dart';
+
 ///
 @sealed
 abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
-  Set<T> enumConstants;
+  final List<T> _enumConstants;
 
-  EnumSet._(Iterable<T> all, [Iterable<T>? values]) : enumConstants = {...all} {
-    if (values != null) {
-      addAll(values);
-    }
+  EnumSet._(List<T> all) : _enumConstants = all;
+
+  // TODO: Implement solution for large enums
+  factory EnumSet.of(List<T> all, Iterable<T> elements) {
+    return _BaseEnumSetImpl<T>.fromIterable(all, elements);
   }
 
-  factory EnumSet.of(Iterable<T> all, Iterable<T> values) {
-    if (all.length > 64) {}
-    return _BaseEnumSetImpl<T>(all, values);
-  }
-
-  factory EnumSet.allOf(Iterable<T> all) {
+  factory EnumSet.allOf(List<T> all) {
     return EnumSet.of(all, all);
   }
 
-  factory EnumSet.noneOf(Iterable<T> all) {
+  factory EnumSet.noneOf(List<T> all) {
     return EnumSet.of(all, <T>[]);
   }
 
-  factory EnumSet.complementOf(EnumSet<T> otherSet) {
-    return EnumSet.of(otherSet.enumConstants, otherSet._complement());
+  factory EnumSet.complementOf(EnumSet<T> other) {
+    return EnumSet.of(other._enumConstants, other.complement());
+  }
+
+  factory EnumSet.copy(EnumSet<T> other) {
+    return EnumSet.of(other._enumConstants, other);
   }
 
   @override
@@ -33,18 +35,33 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
     elements.forEach(add);
   }
 
-  Iterable<T> _complement();
+  EnumSet<T> complement();
+  EnumSet<T> copy();
 }
 
 class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
   int bitValue = 0;
 
-  _BaseEnumSetImpl(super.all, super.values) : super._();
+  _BaseEnumSetImpl.fromIterable(super.all, Iterable<T> elements) : super._() {
+    if (elements is _BaseEnumSetImpl<T>) {
+      bitValue = elements.bitValue;
+    } else {
+      addAll(elements);
+    }
+  }
 
-  _BaseEnumSetImpl.empty(super.all) : super._();
+  _BaseEnumSetImpl.copy(super.all, this.bitValue) : super._();
 
-  Iterable<T> _complement() {
-    return [];
+  @override
+  _BaseEnumSetImpl<T> copy() {
+    return _BaseEnumSetImpl.copy(_enumConstants, bitValue);
+  }
+
+  @override
+  EnumSet<T> complement() {
+    var set = copy();
+    set.bitValue = (~set.bitValue).toUnsigned(_enumConstants.length);
+    return set;
   }
 
   @override
@@ -78,40 +95,37 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
   }
 
   @override
-  Set<T> difference(Set<Object?> other) {
+  EnumSet<T> difference(Set<Object?> other) {
     if (other is _BaseEnumSetImpl<T>) {
-      var set = _BaseEnumSetImpl.empty(enumConstants);
-      set.bitValue = bitValue ^ (1 << other.bitValue);
+      var set = copy();
+      set.bitValue &= (bitValue ^ other.bitValue);
       return set;
     }
-    // TODO: implement difference
-    throw UnimplementedError();
+    return copy();
   }
 
   @override
-  Set<T> intersection(Set<Object?> other) {
+  EnumSet<T> intersection(Set<Object?> other) {
     if (other is _BaseEnumSetImpl<T>) {
-      var set = _BaseEnumSetImpl.empty(enumConstants);
-      set.bitValue = bitValue & (1 << other.bitValue);
+      var set = copy();
+      set.bitValue &= other.bitValue;
       return set;
     }
-    // TODO: implement difference
-    throw UnimplementedError();
+    return copy();
   }
 
   @override
-  Set<T> union(Set<T> other) {
+  EnumSet<T> union(Set<T> other) {
     if (other is _BaseEnumSetImpl<T>) {
-      var set = _BaseEnumSetImpl.empty(enumConstants);
-      set.bitValue = bitValue | other.bitValue;
+      var set = copy();
+      set.bitValue |= other.bitValue;
       return set;
     }
-    // TODO: implement union
-    throw UnimplementedError();
+    return copy();
   }
 
   @override
-  Iterator<T> get iterator => EnumIterator._(enumConstants.toList(), bitValue);
+  Iterator<T> get iterator => EnumIterator._(_enumConstants.toList(), bitValue);
 
   @override
   T? lookup(Object? object) {
@@ -122,7 +136,7 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
   @override
   bool remove(Object? value) {
     if (contains(value) && value is T) {
-      bitValue = bitValue ^ value.index;
+      bitValue ^= (1 << value.index);
       return true;
     }
     return false;
@@ -155,12 +169,10 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
   }
 
   @override
-  T elementAt(int index) {
-    return enumConstants.elementAt(bitValue << index);
-  }
+  T elementAt(int index) => _enumConstants[base(ffsn(bitValue, index))];
 
   @override
-  T get first => enumConstants.elementAt(bitValue & -bitValue);
+  T get first => _enumConstants[base(bitValue & -bitValue)];
 
   @override
   bool get isEmpty => bitValue == 0;
@@ -169,29 +181,32 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
   bool get isNotEmpty => bitValue != 0;
 
   @override
+  int get length => countBits(bitValue);
+
+  @override
   T get single {
     if (bitValue != 0 && bitValue & (bitValue - 1) == 0) {
-      return enumConstants.elementAt(bitValue);
+      return _enumConstants[base(bitValue)];
     }
-    // TODO: implement singleWhere
-    throw UnimplementedError();
+    throw "Bad state: Too many elements";
   }
 }
 
 class EnumIterator<T extends Enum> extends Iterator<T> {
-  List<T> _elements;
+  final List<T> _elements;
   int _remaining;
   int _current = 0;
 
   EnumIterator._(this._elements, this._remaining);
 
   @override
-  T get current => _elements[_current];
+  T get current => _elements[base(_current)];
 
   @override
   bool moveNext() {
+    if (_remaining == 0) return false;
     _current = _remaining & -_remaining;
     _remaining ^= _current;
-    return _remaining != 0;
+    return true;
   }
 }
