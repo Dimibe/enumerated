@@ -149,24 +149,27 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
 
   @override
   void removeWhere(bool Function(T element) test) {
-    // TODO: implement removeWhere
+    for (T element in this) {
+      if (test(element)) remove(element);
+    }
   }
 
   @override
   void retainAll(Iterable<Object?> elements) {
-    // TODO: implement retainAll
+    for (T element in this) {
+      if (!elements.contains(element)) remove(element);
+    }
   }
 
   @override
   void retainWhere(bool Function(T element) test) {
-    // TODO: implement retainWhere
+    for (T element in this) {
+      if (!test(element)) remove(element);
+    }
   }
 
   @override
-  Set<R> cast<R>() {
-    // TODO: implement cast
-    throw UnimplementedError();
-  }
+  Set<R> cast<R>() => Iterable.castFrom<T, R>(this).toSet();
 
   @override
   T elementAt(int index) => _enumConstants[base(ffsn(bitValue, index))];
