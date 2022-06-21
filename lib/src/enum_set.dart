@@ -30,11 +30,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
     return EnumSet.of(other._enumConstants, other);
   }
 
-  @override
-  void addAll(Iterable<T> elements) {
-    elements.forEach(add);
-  }
-
+  void fill();
   EnumSet<T> complement();
   EnumSet<T> copy();
 }
@@ -71,6 +67,20 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
     }
     bitValue |= (1 << value.index);
     return true;
+  }
+
+  @override
+  void addAll(Iterable<T>? elements) {
+    if (elements is _BaseEnumSetImpl<T>) {
+      bitValue |= elements.bitValue;
+    } else {
+      elements?.forEach(add);
+    }
+  }
+
+  @override
+  void fill() {
+    bitValue |= 1 << _enumConstants.length;
   }
 
   @override
@@ -144,7 +154,11 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
 
   @override
   void removeAll(Iterable<Object?> elements) {
-    elements.forEach(remove);
+    if (elements is _BaseEnumSetImpl<T>) {
+      bitValue &= ~elements.bitValue;
+    } else {
+      elements.forEach(remove);
+    }
   }
 
   @override

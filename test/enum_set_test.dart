@@ -92,8 +92,19 @@ void main() {
       var set = EnumSet.allOf(Test.values);
       set.removeAll([Test.three, Test.two]);
       expect(set.length, Test.values.length - 2);
+      expect(set.toList(), [Test.one, Test.four, Test.five]);
       set.removeAll([Test.three, Test.five]);
       expect(set.length, Test.values.length - 3);
+      expect(set.toList(), [Test.one, Test.four]);
+      set.removeAll([Test.one, Test.four]);
+      expect(set.length, 0);
+    });
+
+    test('test fill', () {
+      var set = EnumSet.noneOf(Test.values);
+      expect(set.length, 0);
+      set.fill();
+      expect(set.length, Test.values.length);
     });
   });
 
