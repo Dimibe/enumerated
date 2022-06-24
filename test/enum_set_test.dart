@@ -70,7 +70,15 @@ void main() {
       expect(set.length, 2);
     });
 
-    test('test addAll', () {
+    test('test addAll from EnumSet', () {
+      var set = EnumSet.noneOf(Test.values);
+      set.addAll(EnumSet.of(Test.values, [Test.three, Test.two]));
+      expect(set.length, 2);
+      set.addAll(EnumSet.of(Test.values, [Test.three, Test.five]));
+      expect(set.length, 3);
+    });
+
+    test('test addAll from other iterable', () {
       var set = EnumSet.noneOf(Test.values);
       set.addAll([Test.three, Test.two]);
       expect(set.length, 2);
@@ -88,7 +96,19 @@ void main() {
       expect(set.length, Test.values.length - 2);
     });
 
-    test('test removeAll', () {
+    test('test removeAll with EnumSet', () {
+      var set = EnumSet.allOf(Test.values);
+      set.removeAll(EnumSet.of(Test.values, [Test.three, Test.two]));
+      expect(set.length, Test.values.length - 2);
+      expect(set.toList(), [Test.one, Test.four, Test.five]);
+      set.removeAll(EnumSet.of(Test.values, [Test.three, Test.five]));
+      expect(set.length, Test.values.length - 3);
+      expect(set.toList(), [Test.one, Test.four]);
+      set.removeAll(EnumSet.of(Test.values, [Test.one, Test.four]));
+      expect(set.length, 0);
+    });
+
+    test('test removeAll woth other iterable', () {
       var set = EnumSet.allOf(Test.values);
       set.removeAll([Test.three, Test.two]);
       expect(set.length, Test.values.length - 2);
@@ -124,7 +144,7 @@ void main() {
   });
 
   group('group set tests', () {
-    test('test union', () {
+    test('test union between EnumSets', () {
       var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
       var set2 = EnumSet.of(Test.values, {Test.three});
       expect(set1.union(set2).toList(), [Test.one, Test.two, Test.three]);
@@ -134,16 +154,44 @@ void main() {
       expect(set2.union(set1).toList(), [Test.one, Test.two, Test.three]);
     });
 
-    test('test difference', () {
+    test('test union with iterable', () {
+      var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
+      var set2 = {Test.three};
+      expect(set1.union(set2).toList(), [Test.one, Test.two, Test.three]);
+      expect(set2.union(set1).toList(), [Test.three, Test.one, Test.two]);
+      set2.add(Test.one);
+      expect(set1.union(set2).toList(), [Test.one, Test.two, Test.three]);
+      expect(set2.union(set1).toList(), [Test.three, Test.one, Test.two]);
+    });
+
+    test('test difference between EnumSets', () {
       var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
       var set2 = EnumSet.of(Test.values, {Test.one, Test.three});
       expect(set1.difference(set2).toList(), [Test.two]);
       expect(set2.difference(set1).toList(), [Test.three]);
     });
 
-    test('test intersection', () {
+    test('test difference with iterable', () {
+      var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
+      var set2 = <Test>{Test.one, Test.three};
+      print(set2.contains(set1.elementAt(0)));
+      expect(set1.difference(set2).toList(), [Test.two]);
+      expect(set2.difference(set1).toList(), [Test.three]);
+    });
+
+    test('test intersection between EnumSets', () {
       var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
       var set2 = EnumSet.of(Test.values, {Test.three});
+      expect(set1.intersection(set2).toList(), []);
+      expect(set2.intersection(set1).toList(), []);
+      set2.add(Test.one);
+      expect(set1.intersection(set2).toList(), [Test.one]);
+      expect(set2.intersection(set1).toList(), [Test.one]);
+    });
+
+    test('test intersection with iterable', () {
+      var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
+      var set2 = {Test.three};
       expect(set1.intersection(set2).toList(), []);
       expect(set2.intersection(set1).toList(), []);
       set2.add(Test.one);
