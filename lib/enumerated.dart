@@ -1,6 +1,6 @@
-/// Support for doing something awesome.
+/// The enumerated library adds useful functionality to dart enums
 ///
-/// More dartdocs go here.
+/// One main aspect of the library is the support of [EnumSet].
 library enumerated;
 
 export 'src/enum_set.dart' show EnumSet;

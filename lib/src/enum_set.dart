@@ -1,3 +1,4 @@
+import 'package:enumerated/src/const.dart';
 import 'package:meta/meta.dart';
 
 import 'bit_operations.dart';
@@ -42,6 +43,9 @@ import 'bit_operations.dart';
 abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   final List<T> _enumConstants;
 
+  @protected
+  List<T> get enumConstants => _enumConstants;
+
   EnumSet._(List<T> all) : _enumConstants = all;
 
   /// Creates a new [EnumSet] which holds the specified elements
@@ -58,7 +62,11 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   /// EnumSet.of(MyEnum.values, [MyEnum.one]);
   /// ```
   factory EnumSet.of(List<T> all, Iterable<T> elements) {
-    return _BaseEnumSetImpl<T>.fromIterable(all, elements);
+    if (all.length <= maxBitsInt) {
+      return _BaseEnumSetImpl<T>.fromIterable(all, elements);
+    } else {
+      return _LargeEnumSetImpl.fromIterable(all, elements);
+    }
   }
 
   /// Creates a new [EnumSet] which holds all elements of a given [Enum].
