@@ -1,6 +1,6 @@
 import 'package:enumerated/enumerated.dart';
 
-enum Test {
+enum Numbers {
   one,
   two,
   three,
@@ -9,10 +9,10 @@ enum Test {
 }
 
 void main() {
-  var set = EnumSet.of(Test.values, [Test.one, Test.two, Test.five]);
-  var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
-  var set2 = {Test.three};
-  print(set1.union(set2).toList());
-  print(set2.union(set1).toList());
-  print(set);
+  var set1 = EnumSet<Numbers>.of(Numbers.values, {Numbers.one, Numbers.two});
+  var set2 = {Numbers.three};
+  var set1set2Union = set1.union(set2);
+  print(set1set2Union);
+  var set1complement = set1.complement();
+  print(set1complement);
 }
