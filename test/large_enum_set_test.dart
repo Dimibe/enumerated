@@ -6,7 +6,42 @@ enum Test {
   two,
   three,
   four,
-  five;
+  five,
+  six,
+  seven,
+  eight,
+  nine,
+  ten,
+  eleven,
+  twelve,
+  thirteen,
+  fourteen,
+  fiveteen,
+  sixteen,
+  seventeen,
+  eightteen,
+  nineteen,
+  twenty,
+  twentyone,
+  twentytwo,
+  twentythree,
+  twentyfour,
+  twentyfive,
+  twentysix,
+  twentyseven,
+  twentyeight,
+  twentynine,
+  thirty,
+  thiryone,
+  thirtytwo,
+  thritythree,
+  thrityfour,
+  thirtyfive,
+  thirtysix,
+  thirtyseven,
+  thirtyeight,
+  thirtynine,
+  fourty;
 }
 
 void main() {
@@ -24,10 +59,16 @@ void main() {
     });
 
     test('test elementAt', () {
-      var set = EnumSet.of(Test.values, [Test.one, Test.two, Test.five]);
+      var set = EnumSet.of(Test.values, [
+        Test.one,
+        Test.thirtytwo,
+        Test.thritythree,
+        Test.fourty,
+      ]);
       expect(set.elementAt(0), Test.one);
-      expect(set.elementAt(1), Test.two);
-      expect(set.elementAt(2), Test.five);
+      expect(set.elementAt(1), Test.thirtytwo);
+      expect(set.elementAt(2), Test.thritythree);
+      expect(set.elementAt(3), Test.fourty);
     });
 
     test('test first and last', () {
@@ -61,13 +102,15 @@ void main() {
   group('group add/remove tests', () {
     test('test add', () {
       var set = EnumSet.noneOf(Test.values);
-      expect(set.add(Test.three), isTrue);
-      expect(set.single, Test.three);
+      expect(set.add(Test.thritythree), isTrue);
+      expect(set.single, Test.thritythree);
       expect(set.length, 1);
-      expect(set.add(Test.three), isFalse);
+      expect(set.add(Test.thritythree), isFalse);
       expect(set.length, 1);
       expect(set.add(Test.two), isTrue);
       expect(set.length, 2);
+      expect(set.add(Test.fourty), isTrue);
+      expect(set.length, 3);
     });
 
     test('test addAll from EnumSet', () {
@@ -100,24 +143,24 @@ void main() {
       var set = EnumSet.allOf(Test.values);
       set.removeAll(EnumSet<Test>.of(Test.values, [Test.three, Test.two]));
       expect(set.length, Test.values.length - 2);
-      expect(set.toList(), [Test.one, Test.four, Test.five]);
+      expect(set.containsAll([Test.three, Test.two]), isFalse);
       set.removeAll(EnumSet<Test>.of(Test.values, [Test.three, Test.five]));
       expect(set.length, Test.values.length - 3);
-      expect(set.toList(), [Test.one, Test.four]);
+      expect(set.contains(Test.five), isFalse);
       set.removeAll(EnumSet<Test>.of(Test.values, [Test.one, Test.four]));
-      expect(set.length, 0);
+      expect(set.length, Test.values.length - 5);
     });
 
     test('test removeAll with other iterable', () {
       var set = EnumSet.allOf(Test.values);
       set.removeAll([Test.three, Test.two]);
       expect(set.length, Test.values.length - 2);
-      expect(set.toList(), [Test.one, Test.four, Test.five]);
+      expect(set.containsAll([Test.three, Test.two]), isFalse);
       set.removeAll([Test.three, Test.five]);
       expect(set.length, Test.values.length - 3);
-      expect(set.toList(), [Test.one, Test.four]);
+      expect(set.contains(Test.five), isFalse);
       set.removeAll([Test.one, Test.four]);
-      expect(set.length, 0);
+      expect(set.length, Test.values.length - 5);
     });
 
     test('test fill', () {
@@ -125,33 +168,34 @@ void main() {
       expect(set.length, 0);
       set.fill();
       expect(set.length, Test.values.length);
+      expect(set.toList().length, Test.values.length);
     });
 
     test('test contains ', () {
-      var set = EnumSet.of(Test.values, [Test.two, Test.three]);
+      var set = EnumSet.of(Test.values, [Test.two, Test.fourty]);
       expect(set.contains(Test.one), isFalse);
       expect(set.contains(Test.two), isTrue);
-      expect(set.contains(Test.three), isTrue);
+      expect(set.contains(Test.fourty), isTrue);
     });
 
     test('test contains all with enum set', () {
-      var set = EnumSet.of(Test.values, [Test.two, Test.three]);
-      var other = EnumSet.of(Test.values, [Test.three]);
+      var set = EnumSet.of(Test.values, [Test.two, Test.fourty]);
+      var other = EnumSet.of(Test.values, [Test.fourty]);
       expect(set.containsAll(other), isTrue);
       other = EnumSet.of(Test.values, [Test.one]);
       expect(set.containsAll(other), isFalse);
-      other = EnumSet.of(Test.values, [Test.one, Test.three]);
+      other = EnumSet.of(Test.values, [Test.one, Test.fourty]);
       expect(set.containsAll(other), isFalse);
-      other = EnumSet.of(Test.values, [Test.two, Test.three]);
+      other = EnumSet.of(Test.values, [Test.two, Test.fourty]);
       expect(set.containsAll(other), isTrue);
     });
 
     test('test contains all with iterable', () {
-      var set = EnumSet.of(Test.values, [Test.two, Test.three]);
-      expect(set.containsAll([Test.three]), isTrue);
+      var set = EnumSet.of(Test.values, [Test.two, Test.fourty]);
+      expect(set.containsAll([Test.fourty]), isTrue);
       expect(set.containsAll([Test.one]), isFalse);
-      expect(set.containsAll([Test.one, Test.three]), isFalse);
-      expect(set.containsAll([Test.two, Test.three]), isTrue);
+      expect(set.containsAll([Test.one, Test.fourty]), isFalse);
+      expect(set.containsAll([Test.two, Test.fourty]), isTrue);
     });
   });
 
@@ -195,14 +239,12 @@ void main() {
       var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
       var set2 = EnumSet.of(Test.values, {Test.one, Test.three});
       expect(set1.difference(set2).toList(), [Test.two]);
-      set1.difference(EnumSet<Test>.allOf(Test.values));
       expect(set2.difference(set1).toList(), [Test.three]);
     });
 
     test('test difference with iterable', () {
       var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
       var set2 = <Test>{Test.one, Test.three};
-      print(set2.contains(set1.elementAt(0)));
       expect(set1.difference(set2).toList(), [Test.two]);
       expect(set2.difference(set1).toList(), [Test.three]);
     });
@@ -228,8 +270,12 @@ void main() {
     });
 
     test('test complement', () {
-      var set = EnumSet.of(Test.values, {Test.one, Test.two});
-      expect(set.complement().toList(), [Test.three, Test.four, Test.five]);
+      var set = EnumSet.of(Test.values, {Test.one, Test.two, Test.thirtyfive});
+      var comp = set.complement();
+      expect(comp.contains(Test.fourty), isTrue);
+      expect(comp.contains(Test.one), isFalse);
+      expect(comp.contains(Test.two), isFalse);
+      expect(comp.contains(Test.thirtyfive), isFalse);
     });
   });
 }
