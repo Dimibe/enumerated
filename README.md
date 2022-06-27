@@ -1,6 +1,6 @@
 [![pub package](https://img.shields.io/pub/v/enumerated.svg)](https://pub.dev/packages/enumerated)
 [![package publisher](https://img.shields.io/pub/publisher/enumerated.svg)](https://pub.dev/packages/enumerated)
-![build](https://github.com/Dimibe/enumerated/workflows/CI/badge.svg?branch=main)
+![build](https://github.com/Dimibe/enumerated/workflows/dart/badge.svg?branch=main)
 
 The enumerated package adds additional functionality around dart enums. 
 One main aspect of this package is the `EnumSet`.  
