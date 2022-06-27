@@ -110,7 +110,9 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   /// Example:
   /// ```
   /// enum Numbers {one, two, three;}
+  ///
   /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.one]);
+  ///
   /// print(set); // (Numbers.one)
   /// set.fill();
   /// print(set); // (Numbers.one, Numbers.two, Numbers.three)
@@ -127,6 +129,129 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   /// created set holds exactly the same data as the one on which the method
   /// is called on.
   EnumSet<T> copy();
+
+  /// Adds [value] to the set.
+  ///
+  /// Returns `true` if [value] (or an equal value) was not yet in the set.
+  /// Otherwise returns `false` and the set is not changed.
+  ///
+  /// Example:
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.two]);
+  ///
+  /// var added = set.add(Numbers.one);
+  /// print(added); // true
+  ///
+  /// added = set.add(Numbers.two);
+  /// print(added); // false
+  ///
+  /// print(set); // (Numbers.one, Numbers.two)
+  /// ```
+  @override
+  bool add(T value);
+
+  /// Adds all [elements] to this set.
+  ///
+  /// Equivalent to adding each element in [elements] using [add],
+  /// but some collections may be able to optimize it.
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.two]);
+  ///
+  /// set.addAll({Numbers.one, Numbers.two});
+  /// print(set); // (Numbers.one, Numbers.two)
+  ///
+  /// set.addAll(EnumSet<Numbers>.of(Numbers.values, [Numbers.three]));
+  /// print(set); // (Numbers.one, Numbers.two, Numbers.three)
+  /// ```
+  @override
+  void addAll(Iterable<T> elements);
+
+  /// Removes [value] from the set.
+  ///
+  /// Returns `true` if [value] was in the set, and `false` if not.
+  /// The method has no effect if [value] was not in the set.
+  ///
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.two, Numbers.three]);
+  ///
+  /// final didRemove2 = set.remove(Numbers.two); // true
+  /// final didRemove1 = set.remove(Numbers.one); // false
+  ///
+  /// print(set); // (Numbers.three)
+  /// ```
+  @override
+  bool remove(Object? value);
+
+  /// Removes each element of [elements] from this set.
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.two, Numbers.three]);
+  ///
+  /// set.removeAll({Numbers.one, Numbers.two});
+  /// print(set); // (Numbers.three)
+  /// ```
+  @override
+  void removeAll(Iterable<Object?> elements);
+
+  /// Removes all elements of this set that are not elements in [elements].
+  ///
+  /// Checks for each element of [elements] whether there is an element in this
+  /// set that is equal to it (according to `this.contains`), and if so, the
+  /// equal element in this set is retained, and elements that are not equal
+  /// to any element in [elements] are removed.
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.two, Numbers.three]);
+  /// set.retainAll({Numbers.one, Numbers.two});
+  /// print(set); // (Numbers.two)
+  /// ```
+  @override
+  void retainAll(Iterable<Object?> elements);
+
+  /// Removes all elements from the set.
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.two]);
+  ///
+  /// set.clear(); // ()
+  /// ```
+  @override
+  void clear();
+
+  /// Whether [value] is in the set.
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.one]);
+  ///
+  /// final contains1 = set.contains(Test.one); // true
+  /// final contains2 = set.contains(Test.two); // false
+  /// ```
+  @override
+  bool contains(Object? value);
+
+  /// Whether this set contains all the elements of [other].
+  /// ```dart
+  /// enum Numbers {one, two, three;}
+  ///
+  /// var set = EnumSet<Numbers>.of(Numbers.values, [Numbers.one, Numbers.two]);
+  ///
+  /// final contains12 = set.containsAll({Numbers.one, Numbers.two});
+  /// print(contains12); // true
+  /// final contains13 = set.containsAll({Numbers.one, Numbers.three});
+  /// print(contains13); // false
+  /// ```
+  @override
+  bool containsAll(Iterable<Object?> other);
 
   /// Creates a new [EnumSet] with the elements of this that are not in [other].
   ///
@@ -204,10 +329,10 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   ///
   /// var set1 = EnumSet<Numbers>.of(Numbers.values, {Numbers.one, Numbers.three});
   ///
-  /// final contains1 = characters.lookup(Numbers.one);
+  /// final contains1 = set.lookup(Numbers.one);
   /// print(contains1); // Numbers.one
   ///
-  /// final contains2 = characters.lookup(Numbers.two);
+  /// final contains2 = set.lookup(Numbers.two);
   /// print(contains2); // null
   /// ```
   @override
