@@ -1,6 +1,6 @@
 name: enumerated
-description: A dart package with useful extensions for Dart enums.
-version: 0.1.0
+description: A dart package which provides utilities araound dart enums like an EnumSet. 
+version: 0.1.1
 homepage: https://begnis.dev
 repository: https://github.com/Dimibe/enumerated
 
@@ -8,7 +8,7 @@ environment:
   sdk: '>=2.17.1 <3.0.0'
 
 dependencies:
-  meta: any
+  meta: ^1.8.0
 
 dev_dependencies:
   lints: ^2.0.0

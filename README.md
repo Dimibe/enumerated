@@ -15,7 +15,7 @@ One main aspect of this package is the `EnumSet`.
 Add the package to your pubspec.yaml:
 
 ```yaml
- enumerated: ^0.1.0
+ enumerated: ^0.1.1
  ```
  
  In your dart file, import the library:
