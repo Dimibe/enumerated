@@ -105,9 +105,36 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   factory EnumSet.copy(EnumSet<T> other) =>
       EnumSet<T>.of(other._enumConstants, other);
 
+  /// Compares the EnumSet with [other] and checks if both contains the same
+  /// values.
+  ///
+  /// ```dart
+  /// var set1 = EnumSet<Numbers>.of(Numbers.values, [Numbers.one]);
+  /// var set2 = EnumSet<Numbers>.of(Numbers.values, [Numbers.two]);
+  /// var set3 = EnumSet<Numbers>.of(Numbers.values, [Numbers.two]);
+  ///
+  /// set1.equals(set2); // false
+  /// set2.equals(set3); // true
+  /// set1.equals({Numbers.one}); // true
+  /// ```
+  bool equals(Set<T> other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (length != other.length) {
+      return false;
+    }
+    for (var v in this) {
+      if (!other.contains(v)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   /// Fills the [EnumSet] with all values from the dependent [Enum].
   /// This method is equivalent to [addAll] with a list of the enums universe.
-  /// Example:
+  ///
   /// ```
   /// enum Numbers {one, two, three;}
   ///
@@ -135,7 +162,6 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   /// Returns `true` if [value] (or an equal value) was not yet in the set.
   /// Otherwise returns `false` and the set is not changed.
   ///
-  /// Example:
   /// ```dart
   /// enum Numbers {one, two, three;}
   ///
@@ -156,6 +182,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   ///
   /// Equivalent to adding each element in [elements] using [add],
   /// but some collections may be able to optimize it.
+  ///
   /// ```dart
   /// enum Numbers {one, two, three;}
   ///
@@ -189,6 +216,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   bool remove(Object? value);
 
   /// Removes each element of [elements] from this set.
+  ///
   /// ```dart
   /// enum Numbers {one, two, three;}
   ///
@@ -206,6 +234,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   /// set that is equal to it (according to `this.contains`), and if so, the
   /// equal element in this set is retained, and elements that are not equal
   /// to any element in [elements] are removed.
+  ///
   /// ```dart
   /// enum Numbers {one, two, three;}
   ///
@@ -217,6 +246,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   void retainAll(Iterable<Object?> elements);
 
   /// Removes all elements from the set.
+  ///
   /// ```dart
   /// enum Numbers {one, two, three;}
   ///
@@ -228,6 +258,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   void clear();
 
   /// Whether [value] is in the set.
+  ///
   /// ```dart
   /// enum Numbers {one, two, three;}
   ///
@@ -240,6 +271,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   bool contains(Object? value);
 
   /// Whether this set contains all the elements of [other].
+  ///
   /// ```dart
   /// enum Numbers {one, two, three;}
   ///
@@ -257,6 +289,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   ///
   /// That is, the returned set contains all the elements of this [EnumSet] that
   /// are not elements of [other] according to `other.contains`.
+  ///
   /// ```dart
   /// enum Numbers { one, two, three; }
   ///
@@ -277,6 +310,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   ///
   /// That is, the returned set contains all the elements of this [EnumSet] and
   /// all the elements of [other].
+  ///
   /// ```dart
   /// enum Numbers { one, two, three; }
   ///
@@ -297,6 +331,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   ///
   /// That is, the returned set contains all the elements of this [EnumSet] that
   /// are also elements of [other] according to `other.contains`.
+  ///
   /// ```dart
   /// enum Numbers { one, two, three; }
   ///
@@ -324,6 +359,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   /// rather than being based on an actual object instance,
   /// then there may not be a specific object instance representing the
   /// set element.
+  ///
   /// ```dart
   /// enum Numbers { one, two, three; }
   ///
@@ -339,6 +375,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   T? lookup(Object? object) => contains(object) ? object as T : null;
 
   /// Removes all elements of this set that satisfy [test].
+  ///
   /// ```dart
   /// enum Numbers { one, two, three; }
   ///
@@ -355,6 +392,7 @@ abstract class EnumSet<T extends Enum> extends Iterable<T> implements Set<T> {
   }
 
   /// Removes all elements of this set that fail to satisfy [test].
+  ///
   /// ```dart
   /// enum Numbers { one, two, three; }
   ///
@@ -451,6 +489,14 @@ class _BaseEnumSetImpl<T extends Enum> extends EnumSet<T> {
       }
     }
     return set;
+  }
+
+  @override
+  bool equals(Set<T> other) {
+    if (other is _BaseEnumSetImpl<T>) {
+      return bitValue == other.bitValue;
+    }
+    return super.equals(other);
   }
 
   @override
@@ -690,6 +736,19 @@ class _LargeEnumSetImpl<T extends Enum> extends EnumSet<T> {
       currentLength += bitCount;
     }
     throw RangeError.index(index, this, "index", null, _length);
+  }
+
+  @override
+  bool equals(Set<T> other) {
+    if (other is _LargeEnumSetImpl<T>) {
+      for (int i = 0; i < bitValues.length; i++) {
+        if (bitValues[i] != other.bitValues[i]) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return super.equals(other);
   }
 
   @override

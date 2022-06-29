@@ -170,6 +170,31 @@ void main() {
     });
   });
 
+  group('group equality tests', () {
+    test('test equality with enum set', () {
+      var set1 = EnumSet<Test>.allOf(Test.values);
+      var set2 = EnumSet<Test>.allOf(Test.values);
+      var set3 = EnumSet.allOf(Test.values);
+      var set4 = EnumSet<Test>.of(Test.values, [Test.five]);
+      expect(set1.equals(set1), isTrue);
+      expect(set1.equals(set2), isTrue);
+      expect(set1.equals(set3), isTrue);
+      expect(set4.equals(set3), isFalse);
+      set4.fill();
+      expect(set4.equals(set3), isTrue);
+    });
+
+    test('test equality with iterable', () {
+      var set1 = EnumSet<Test>.allOf(Test.values);
+      var set2 = {...Test.values};
+      var set4 = EnumSet<Test>.of(Test.values, [Test.five]);
+      expect(set1.equals(set1), isTrue);
+      expect(set1.equals(set2), isTrue);
+      set4.fill();
+      expect(set4.equals(set1), isTrue);
+    });
+  });
+
   group('group set tests', () {
     test('test union between EnumSets', () {
       var set1 = EnumSet.of(Test.values, {Test.one, Test.two});
